@@ -112,9 +112,15 @@ result calculate(point *points, int n) {
 	result min_right = calculate(&(points[m]), n - m);
 	//  printf("ml %d %d %d\n", min_left->magic, min_left->n1, min_left->n2);
 	//  printf("mr%d %d %d\n", min_right->magic, min_right->n1, min_right->n2);
-	result r = min_left;
-	if (r.magic > min_right.magic) {
-		r = min_right;
+	result r = min_right;
+	if (r.magic == min_left.magic) {
+		if (r.n1 > min_left.n1) {
+			r = min_left;
+		}
+	} else {
+		if (r.magic > min_left.magic) {
+			r = min_left;
+		}
 	}
 	point *strip = (point *) malloc(n * sizeof(point));
 	for (i = 0, j = 0; i < n; i++) {
