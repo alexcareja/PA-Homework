@@ -1,0 +1,42 @@
+################################## Tema 1 PA ##################################
+
+Student: Careja Alexandru-Cristian
+Grupa: 324 CD
+
+Problema 1. Teme
+
+	Citind enuntul mi s-a parut ca problema se aseamana cu problema rucsacului
+discret, asa ca am ales sa folosesc programare dinamica pentru rezolvarea
+problemei. Mi-am creat 3 structuri:
+	-> homework in care retin o tema si detaliile despre aceasta
+	-> cell, o structura pe care o voi folosi intr-o matrice pentru aflarea
+	solutiei optime. O structura cell are campurile value(numar de puncte), 
+	current (0/1 in functie daca fac sau nu tema i) si previous_cell 
+	(mentioneaza pozitia din matrice a temei rezolvate anterior)
+	-> stack, de care ma voi folosi pentru a inversa ordinea temelor
+	(am scris problema inainte de a se modifica checkerul astfel incat sa nu
+	conteze ordinea, si am afisat problemele sortate crescator dupa deadline)
+	
+	Dupa ce citesc datele de intrare, respectiv temele intr-un vector de struct
+homework, sortez acest vector crescator dupa deadline + 1. Retin deadline-ul cel
+mai mare si apoi imi aloc o matrice lata de max_deadline si inalta de N, cu N = 
+nr de teme + 1. Prima linie a acestei o initializez cu 0 pe toate campurile.
+	Acum vreau sa construiesc in aceasta matrice rezultatul optim dupa ideea:
+matrice[i][j].value reprezinta punctajul maxim pe care il pot obtine facand
+primele i teme (din vectorul sortat) in j saptamani. Astfel pe linia 1 pot
+folosi doar tema 1 pentru a obtine un punctaj cat mai mare, pe linia 2 pot
+folosi doar primele 2 teme si asa mai departe. Pe o linie copiez valoarea de pe
+linia de mai sus, de la acelasi indice al coloanei pana cand ajung in saptamana
+j, cu j >= durata temei i. Pana cand j nu depaseste deadline_tema i, 
+matrice[i][j].value va fi maximul dintre matrice[i-1][j], adica daca nu fac tema
+i si pur si simplu raman cu punctajul de mai sus, si matrice[i-1][j-durata_t_i],
+adica daca renunt la durata_t_i saptamani de mai sus ca sa rezolv tema i. Dupa
+ce j depaseste deadline-ul temei, matrice[i][j].value va fi maximul dintre
+matrice[i-1][j] (sus) si matrice[i][j-1] (stanga).
+	De asemenea la fiecare pas, atunci cand aleg sa fac o tema in schimbul a
+cateva saptamani de pe linia de mai sus, campul current va deveni 1, pentru a
+putea retine ce teme fac pentru optim, si pentru fiecare cell retin si un numar
+previous_cell care reprezinta "indicele" ultimului cell din care am obtinut
+maximul de puncte. Acel "indice" este doar un numar care este calculat:
+i * max_deadline + j, cu i si j indicii solutiei anterioare cu ajutorul careia
+obtin maximul.
