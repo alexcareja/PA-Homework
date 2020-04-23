@@ -3,7 +3,7 @@
 Student: Careja Alexandru-Cristian
 Grupa: 324 CD
 
-Problema 1. Teme
+Problema 1. Temele buclucase
 
 	Citind enuntul mi s-a parut ca problema se aseamana cu problema rucsacului
 discret, asa ca am ales sa folosesc programare dinamica pentru rezolvarea
@@ -40,3 +40,120 @@ previous_cell care reprezinta "indicele" ultimului cell din care am obtinut
 maximul de puncte. Acel "indice" este doar un numar care este calculat:
 i * max_deadline + j, cu i si j indicii solutiei anterioare cu ajutorul careia
 obtin maximul.
+	Dupa terminarea completarii matricei, matrice[N][max_deadline] va contine
+valoarea maxima de puncte pe care o putem obtine. Pentru aflarea temelor care
+contribuie la acest punctaj merg din previous cell in previous cell si acolo
+unde current este setat pe 1, stiu ca acea tema este folosita .
+	Stiva o folosesc ca sa introduc in ea temele pe care le obtin mergand din 
+previous cell in previous cell pentru ca in final, sa extrag temele din stiva si
+acestea sa fie in ordinea lor crescatoare dupa deadline.
+
+
+Problema 2. Numarul magic
+
+	Si la aceasta problema am observat o asemanare cu o alta problema, incercand
+sa rezolv de mana un exemplu. Problema se aseamana cu problema distantei dintre
+doua puncte intr-un plan, unde coordonatele unui biletel sunt indicele lui si
+suma elementelor din stanga sa. Am construit un algoritm Divide et Impera care
+imparte problema in 3 subprobleme: left middle si right.
+	Structuri folosite:
+	-> point; 2 campuri: index, sum (un biletel <=> un punct in plan)
+	-> result; 3 campuri: magic, n1, n2 (o combinatie de 2 biletele n1 n2)
+	Astfel, dupa ce citesc datele de intrare, parcug o data vectorul de numere
+si imi creez un vector de puncte care au o suma si un indice (care pot fi echi-
+valate cu x si y ale unui punct).
+	Acest vector este deja sortat dupa indice, asa ca voi considera ca 
+coordonata x este indicele biletelelor si ca y pe suma din stanga biletelului.
+Daca numarul de puncte din plan este mai mic sau egal decat 3, atunci aplic un
+brute force in care calculez numarul magic minim si returnez o structura de tip
+result cu numarul magic si indicele bieletelelor. Daca planul are mai mult de 3
+puncte in el, atunci il impart in doua, si apelez o calculare a minimului din
+planul stand si o calculare a minimului din planul drept. Retin solutia cu nr
+magic cel mai mic si daca sunt egale, pe cea cu indicele biltetului cel mai mic
+si mai trebuie sa verific daca exista un numar magic mai mic format de un bilet
+din planul stang impreuna cu un bilet din planul drept. Aceasta verificare o pot
+face in complexitate O(n), folosindu-ma de numarul magic calculat mai devreme
+astfel:
+	Aleg punctul din mijlocul planului. Daca diferenta in modul pe axa x dintre
+punctul ales de mijloc si un alt punct p este mai mare decat radical din numarul
+magic minim obtinut din stanga si dreapta (radicat deoarece numarul magic aici
+este egal cu patratul distantei dintre doua puncte), atunci stiu cu siguranta ca
+p nu poate forma un numar magic mai mic cu un punct din celalalt plan raportat 
+la punctul de mijloc. Parcurgan lista de puncte, le aleg doar pe acelea care au
+diferenta de mai sus mai mica decat numarul magic deja creat de pe stanga si
+dreapta si le introduc intr-un vector, pentru a calcula distanta dintre aceste
+puncte (mai exact, cele care se afla in planuri diferite). Apelez o functie
+numita min_strip ca sa calculez minimul dintr-aceasta fasie de puncte care sunt
+mai apropiate de mijlocul planului. 
+	Pentru fiecare punct din aceasta fasie, exista un maxim de 6 posibile numere
+impreuna cu care ar putea forma un numar magic mai mic. Voi face un desen simplu
+in care "X" este reprezentarea axei care desparte planul in doua planuri si "o",
+niste puncte. Stiind ca am ales sa ne uitam doar la punctele care se afla la o
+distanta mai mica decat cel mai mic numar magic de pana acum, si ca distanta
+dintre 2 puncte care se afla in acelasi plan este mai mare sau egala cu actualul
+numar magic minim, ne dam seama ca pentru un punct oarecare exista un numar
+maxim de puncte cu care ar putea forma un numar magic mai mic, si este egal cu 6
+
+	o.X.o
+	| X |
+	o.X.o      un "|" are lungimea mai mare sau egala cu nr magic minim
+	| X |      un "." poate avea orice lungime mai mica decat nr magic nimic
+	o.X.o
+
+	Calculez un numar magic minim in acest strip, si atunci cand ies din functia
+min_strip verific daca il poate inlocui pe vechiul numar magic minim. In final
+returnez solutia minima.
+
+
+Problema 3. Ratustele
+
+	In rezolvarea acestei probleme am observat o proprietate interesanta.
+Formand o multime cu timpii de iesire ai ratelor de pe o linie, se poate observa
+ca este egala cu multimea de distante ale ratelor de pe acea linie. Definesc 
+distanta unei rate ca distanta de la ea pana la marginea catre care este 
+indreptata initial.
+	Inca o proprietate interesanta si usor de observat este aceea ca numarul de
+rate care sare prin stanga este egal cu numarul de rate care sunt initial
+indreptate spre stanga(evident, valabil si pentru dreapta). De asemenea, daca
+avem un numar x de rate care sunt indreptate initial spre stanga si un numar y
+spre dreapta, atunci, primele x rate luate de la stanga la dreapta de pe linie
+vor sari prin stanga, iar restul de y vor sari prin dreapta.
+	Aceste proprietati m-au condus sa descopar ca timpul de iesire al primei
+rate din stanga este egal cu distanta primei rate care este initial intreptata
+catre dreapta, iar aceasta recurenta se continua pana cand se termina numarul de
+rate care se uita initial spre stanga, si implicit numarul de rate care ies prin
+stanga, dupa cu am dedus anterior. Restul de rate vor iesi prin dreapta, si si
+ele au, pe rand, timpii de iesire egali cu distanta ratelor care sunt indreptate
+initial spre dreapta.
+
+	Programul meu citeste datele de intrare si pentru fiecare linie creeaza o
+lista sortata de rate (sortate de la stanga la dreapta dupa coloana). Am creat
+o structura pentru retinerea timpului de iesire si indicele unei rate. Pentru
+fiecare linie, apelez functia solve, care parcurge de 2 ori lista ordonata de
+rate. La prima iteratie imi construiesc doi vectori, unul in care retin ratele
+indreptate spre stanga, si unul in care retin ratele indreptate spre dreapta.
+Apoi, intr-un for care itereaza prin toate ratele memorate in vectorul de rate
+care erau indreptate spre stanga initial, extrag ratele pe rand de pe linie si
+fiecare primeste la randul ei ca timp de iesire, distanta urmatoarei rate din
+vectorul de rate left. Dupa terminarea acestuia, am un al for in care iterez
+prin ratele indreptate spre dreapta, si continui sa scot ratele la rand si sa
+le atribui timpii de iesire egali cu distanta ratelor din vectorul right.
+	Dupa ce a fost apelat solve pe toate liniile, sortez vectorul de solutii
+crescator dupa iesire si apoi dupa identificator, si scriu in fisierul de
+iesire indicele ratei de pe pozitia k din vectorul sortat. (k - 1 actually
+deoarece incep sa umplu vectorul de la indicele 0).
+
+Problema 4. Jocul numerelor impare
+
+	Pentru aceasta problema exista o serie de conditii care trebuie respectate 
+initial de input pentru a putea calcula un numar. In conditiile in care acestea
+conduc la imposibilitatea crearii numarului, se scrie in fisierul de iesire "-1"
+	Aceste reguli sunt:
+	-> K <= L (nu putem forma 3 submultimi nevide folosind 2 numere)
+	-> N >= L + K - 1 (din cauza conditiei de disjunctie si distinctie a 
+	subsecventelor, trebuie lasate K - 1 numere nefolosite, si de asemenea
+	trebuie folosite L numere)
+	-> Trebuie sa existe cel putin un numar impar in input ca sa putem respecta
+	conditia: numar impar de numere impare
+	-> Daca toate numerele din input sunt impare, atunci numarul de numere ce
+	trebuie folosite, adica L, trebuie sa fie impar.

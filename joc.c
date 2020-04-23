@@ -1,7 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct subseq {
+	int val;
+	int left;
+	int right;
+	int len;
+} subseq;
+
 int solve(int *, int, int, int);
+int max(int, int);
 
 int main() {
 	int solution = 0, i, n, k, l;
@@ -34,4 +42,11 @@ int main() {
 
 int solve(int *v, int n, int k, int l) {
 	return 0;
+}
+
+int max(int a, int b) {
+	if (a > b) {
+		return a;
+	}
+	return b;
 }

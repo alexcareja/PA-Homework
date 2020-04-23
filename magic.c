@@ -14,6 +14,8 @@ typedef struct result {
 	int n2;
 } result;
 
+void merge(point *, int , int , int);
+void merge_sort(point *, int , int);
 result calculate(point *, int);
 result bruteForce(point *, int);
 int magic(point, point);
@@ -23,7 +25,7 @@ int main() {
 	char in[] = "magic.in";
 	int n, i;
 	FILE *f = fopen(in, "r");
-	fscanf(f, "%d\n", &n);  // read number o numbers
+	fscanf(f, "%d\n", &n);  // read number of numbers
 	int *nums = (int *) malloc(n * sizeof(int));
 	for (i = 0; i < n; i++) {  // for each number in input file, read it
 		fscanf(f, "%d ", &nums[i]);
@@ -31,12 +33,13 @@ int main() {
 	fclose(f);
 	point *points = (point *) malloc(n * sizeof(point));
 	int sum = 0;
+	// calculate sum for each point and initialise index
 	for (i = 0; i < n; i++) {
 		points[i].index = i + 1;
 		points[i].sum = sum;
 		sum += nums[i];
 	}
-	// points is already sorted ascending by index
+	// points vector is already sorted ascending by index
 	result r = calculate(points, n);
 	FILE *o = fopen("magic.out", "w");
 	fprintf(o, "%d\n%d %d\n", r.magic, r.n1, r.n2);
@@ -46,16 +49,52 @@ int main() {
 	return 0;
 }
 
+void merge(point *v, int i, int m, int j) {
+	//  merge two sorted arrays
+	int iinit = i;
+	point *u = (point *) calloc(j - i + 1, sizeof(point));
+	int l = 0;
+	int k = m + 1;
+	while (i <= m && k <= j) {
+		if (v[i].sum < v[j].sum) {
+			u[l++] = v[i++];
+		} else {
+			u[l++] = v[k++];
+		}
+	}
+	while (i <= m) {
+		u[l++] = v[i++];
+	}
+	while (k <= j) {
+		u[l++] = v[k++];
+	}
+	l = 0;
+	while (iinit <= j) {
+		v[iinit++] = u[l++];
+	}
+	free(u);
+}
+
+void merge_sort(point *v, int i, int j) {
+	//  split array into 2 and merge
+	if (i < j) {
+		int m = (i + j) / 2;
+		merge_sort(v, i, m);
+		merge_sort(v, m + 1, j);
+		merge(v, i, m, j);
+	}
+}
+
 result calculate(point *points, int n) {
 	if (n <= 3) {  // bruteforce if 2 or 3 points
 		return bruteForce(points, n);
 	}
 	int m = n / 2, i, j;
+	// Divide into two and solve
 	point mp = points[m];  // middle point
-	result min_left = calculate(points, m);
-	result min_right = calculate(&(points[m]), n - m);
-	  printf("ml %d %d %d\n", min_left.magic, min_left.n1, min_left.n2);
-	  printf("mr%d %d %d\n", min_right.magic, min_right.n1, min_right.n2);
+	result min_left = calculate(points, m);  // left side
+	result min_right = calculate(&(points[m]), n - m);  // right side
+	// keep the smaller solution
 	result r = min_right;
 	if (r.magic == min_left.magic) {
 		if (r.n1 > min_left.n1) {
@@ -66,8 +105,7 @@ result calculate(point *points, int n) {
 			r = min_left;
 		}
 	}
-
-	 printf("r %d %d %d\n", r.magic, r.n1, r.n2);
+	// put all the points close enough to the centre in a vector
 	point *strip = (point *) malloc(n * sizeof(point));
 	for (i = 0, j = 0; i < n; i++) {
 		if (abs(mp.index - points[i].index) < r.magic) {
@@ -75,10 +113,10 @@ result calculate(point *points, int n) {
 			j++;
 		}
 	}
+	// find out the min magic number fron the strip
 	result ms = min_strip(strip, j, r.magic);
 	free(strip);
-	 printf("r %d %d %d\n", r.magic, r.n1, r.n2);
-	 printf("ms %d %d %d\n", ms.magic, ms.n1, ms.n2);
+	// keep the smaller solution
 	if (ms.magic <= r.magic) {
 		if (ms.magic == r.magic) {
 			if (r.n1 > ms.n1) {
@@ -92,13 +130,13 @@ result calculate(point *points, int n) {
 }
 
 result bruteForce(point *points, int n) {
+	// only called if n < 3. Calculates at max 1-2 1-3 2-3
 	int i, j, m;
 	result r;
 	r.magic = INF;
 	for (i = 0; i < n; i++) {
 		for (j = i + 1; j < n; j++) {
 			m = magic(points[i], points[j]);
-			//  printf("magic[%d, %d] = %d\n", i, j, m);
 			if (m < r.magic) {
 				r.magic = m;
 				r.n1 = points[i].index;
@@ -109,7 +147,7 @@ result bruteForce(point *points, int n) {
 	return r;
 }
 
-int magic(point a, point b) {  // calculate the magic number for points a b
+int magic(point a, point b) {  //  calculate the magic number for points a b
 	int s = a.sum - b.sum;
 	int v = a.index - b.index;
 	return s * s + v * v;
@@ -120,8 +158,9 @@ result min_strip(point *strip, int n, int min) {
 	result r;
 	r.magic = INF;
 	r.n1 = INF;
+	merge_sort(strip, 0, n - 1);  // sort by sum ascending
 	for (i = 0; i < n; i++) {
-		for (j = i + 1; j < n && j < i + 7; j++) {
+		for (j = i + 1; j < n && j < i + 7; j++) {   // at max 6 iterations
 			m = magic(strip[i], strip[j]);
 			if (m <= r.magic) {
 				if (m == r.magic) {
@@ -131,6 +170,7 @@ result min_strip(point *strip, int n, int min) {
 					}
 				}
 				r.magic = m;
+				// n1 must be smaller than n2
 				if (strip[i].index < strip[j].index) {
 					r.n1 = strip[i].index;
 					r.n2 = strip[j].index;
@@ -143,3 +183,4 @@ result min_strip(point *strip, int n, int min) {
 	}
 	return r;
 }
+
