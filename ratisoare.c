@@ -92,24 +92,12 @@ ListNode *rear(SortedList *q) {  // peek rear of the list
 	return q->rear;
 }
 
-void remove_node(SortedList* q, int rear) {
-	// remove an element depending on rear = 1 / 0
+void remove_node(SortedList* q) {
 	if (isListEmpty(q)) {
 		return;
 	}
 	ListNode *aux;
 	q->size -= 1;
-	if (rear) {  // remove last node
-		aux = q->rear;
-		q->rear = aux->prev;
-		if (q->rear == NULL) {
-			q->front = NULL;
-		} else {
-			q->rear->next = NULL;
-		}
-		free(aux);
-		return;
-	}
 	// remove first node
 	aux = q->front;
 	if (aux->next != NULL) {
@@ -166,7 +154,6 @@ int main() {
 
 void solve(solution *s, SortedList *l, int *i, int width) {
 	ListNode *d;
-	// at this point there are at least 2 ducks: -> /// <-
 	int li = 0, ri = 0, j;
 	ListNode **left = (ListNode **) malloc(l->size * sizeof(ListNode *));
 	ListNode **right = (ListNode **) malloc(l->size * sizeof(ListNode *));
@@ -181,7 +168,7 @@ void solve(solution *s, SortedList *l, int *i, int width) {
 		}
 		d = d->next;
 	}
-	d = front(l); 
+	d = front(l);
 	for (j = 0; j < li; j++) {
 		s[*i].id = d->elem->id;
 		s[*i].time = left[j]->elem->pos;
@@ -194,6 +181,11 @@ void solve(solution *s, SortedList *l, int *i, int width) {
 		*i = *i + 1;
 		d = d->next;
 	}
+	for (j = 0; j < li + ri; j++) {
+		remove_node(l);
+	}
+	free(left);
+	free(right);
 }
 
 void merge(solution *v, int i, int m, int j) {
